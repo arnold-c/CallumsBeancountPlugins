@@ -1,3 +1,11 @@
+"""Fava extension for year-end Canadian ACB snapshots.
+
+This extension reads the processed ledger and reconstructs a year-by-year view
+of holdings, total CAD adjusted cost base, and average cost per share for the
+same account structure used by the ACB bookkeeping plugin. It is intended for
+inspection and convenience, not authoritative tax reporting.
+"""
+
 from fava.ext import FavaExtensionBase
 from beancount.core.number import ZERO
 from beancount.core.data import Transaction
@@ -5,9 +13,29 @@ from collections import defaultdict
 
 
 class ACBDashboard(FavaExtensionBase):
+    """Render historical ACB snapshots inside Fava.
+
+    Add this extension to Fava to review year-end holdings derived from the
+    loaded ledger. It works best alongside
+    ``CallumsBeancountPlugins.calculate_acb`` because it expects the same
+    account conventions and generated tax-basis postings.
+    """
+
     report_title = "Canadian ACB"
 
     def get_acb_history(self):
+        """Build year-end holdings snapshots from the loaded ledger.
+
+        The method walks through all transactions in date order, reconstructs
+        running share and ACB balances, applies tax-basis adjustments posted to
+        ``Assets:TaxBasis`` accounts, and stores a snapshot whenever the year
+        changes.
+
+        Returns:
+            A mapping of ``year -> account -> ticker -> metrics`` where metrics
+            includes ``shares``, ``total_acb``, and ``avg_cost`` for positions
+            still held at year-end.
+        """
         # 1. Fetch configuration from ledger
         target_prefixes = ()
         for p in self.ledger.options.get("plugin", []):
@@ -97,7 +125,15 @@ class ACBDashboard(FavaExtensionBase):
         return history
 
     def _snapshot_state(self, state):
-        """Helper to return a dict of holdings only if shares > 0."""
+        """Return a serializable snapshot of open positions only.
+
+        Args:
+            state: Nested running state keyed by account and ticker.
+
+        Returns:
+            A dictionary containing only holdings with positive share balances,
+            or ``None`` when no open positions remain.
+        """
         snapshot = {}
         for acct, tickers in state.items():
             acct_data = {}

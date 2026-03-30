@@ -1,3 +1,12 @@
+"""Beancount plugin for convenience ACB and gains bookkeeping.
+
+Enable this plugin from a Beancount ledger to derive adjusted cost base
+bookkeeping entries for supported investment transactions and custom
+``acb_adjust`` directives. This plugin is intended as a convenience tool for
+personal workflows and should be checked against broker records, CRA guidance,
+and professional tax software or advice.
+"""
+
 from beangulp.exceptions import Error
 from beancount.core import data
 from beancount.core.amount import Amount
@@ -10,6 +19,33 @@ ACBError = namedtuple("ACBError", "source message entry")
 
 
 def calculate_acb(entries, options_map, config=""):
+    """Derive convenience ACB postings and realised gains from a ledger.
+
+    This Beancount plugin walks through ledger entries in order, tracking
+    per-account and per-ticker share balances and CAD adjusted cost base. It
+    handles supported ``Custom`` directives of type ``acb_adjust`` and augments
+    qualifying buy and sell transactions with generated tax-basis and realised
+    gain postings.
+
+    Configure it in a ledger with a standard plugin declaration such as
+    ``plugin "CallumsBeancountPlugins.calculate_acb"``. An optional comma-
+    separated config string may be provided to restrict processing to account
+    prefixes.
+
+    Args:
+        entries: Parsed Beancount entries in ledger order.
+        options_map: Beancount options map supplied by the plugin API.
+        config: Optional comma-separated list of account prefixes to process.
+
+    Returns:
+        A ``(new_entries, errors)`` tuple in the format expected by Beancount.
+
+    Notes:
+        This plugin assumes account naming conventions based on replacing
+        ``Assets`` with ``Assets:TaxBasis`` and ``Income`` when generating
+        companion postings. The results are bookkeeping aids only and should be
+        validated independently before relying on them for tax reporting.
+    """
     # 1. Parse the comma-separated string into a tuple of cleaned prefixes
     target_prefixes = tuple(p.strip() for p in config.split(",")) if config else ()
 
