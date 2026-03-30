@@ -8,14 +8,17 @@ It is not authoritative, should not be treated as official CRA FHSA tracking, an
 
 ## What It Does
 
-The extension finds FHSA accounts in your ledger, groups them by owner, totals qualifying CAD contributions by year, and applies FHSA annual, carry-forward, lifetime, and 15-year eligibility rules.
+The extension finds FHSA accounts in your ledger, groups them by owner, totals qualifying CAD contributions by year, tracks deductions, and applies FHSA annual, carry-forward, lifetime, and 15-year eligibility rules.
 
 It gives you a bookkeeping-oriented view of:
 
 1. annual FHSA contributions
 2. cumulative FHSA contributions
-3. estimated remaining room for each year
-4. estimated remaining lifetime contribution capacity
+3. annual FHSA deductions
+4. cumulative FHSA deductions
+5. remaining undeducted contributions
+6. estimated remaining room for each year
+7. estimated remaining lifetime contribution capacity
 
 ## How It Works
 
@@ -32,6 +35,8 @@ It then:
 6. caps carry-forward at 8,000 CAD
 7. caps lifetime contributions at 40,000 CAD
 8. stops generating new room after 15 calendar years from the opening year
+9. reads FHSA deductions from year-specific account metadata
+10. checks that cumulative deductions never exceed cumulative contributions
 
 The output is therefore only as good as the completeness and correctness of the ledger data and metadata.
 
@@ -44,6 +49,7 @@ FHSA accounts should include metadata like this:
   canadian_tax_type: "FHSA"
   owner: "Primary"
   start_year: "2024"
+  fhsa_deduction_2024: "6000"
 ```
 
 Expected fields:
@@ -52,6 +58,7 @@ Expected fields:
 2. `owner`: optional, defaults to `Primary`
 3. `start_year`: optional, the first calendar year the FHSA was open for that
    owner
+4. `fhsa_deduction_<year>`: optional, FHSA deduction claimed for that tax year
 
 If `start_year` is omitted, the extension falls back to the earliest FHSA contribution year it can find, or 2023 if no FHSA activity exists yet.
 
@@ -77,9 +84,14 @@ The page shows one table per owner with annual rows for:
 2. opening room for the year
 3. annual contributions
 4. cumulative contributions
-5. estimated remaining room
-6. estimated remaining lifetime contribution limit
-7. carry-forward into the next eligible year
+5. annual FHSA deductions
+6. cumulative FHSA deductions
+7. remaining undeducted contributions
+8. estimated remaining room
+9. estimated remaining lifetime contribution limit
+10. carry-forward into the next eligible year
+
+Rows turn red when cumulative deductions exceed cumulative contributions or when remaining FHSA room goes negative. The failing cell is also highlighted in bold red.
 
 ## Important Assumptions
 
@@ -93,6 +105,7 @@ This extension assumes all of the following.
    totals
 5. `start_year` matches the first year the FHSA was actually open if you choose
    to provide it
+6. deduction metadata is entered correctly for each year you want to review
 
 If any of those assumptions are false, the estimate may be wrong.
 
@@ -104,6 +117,7 @@ You should manually verify at least:
 2. whether all FHSA contributions are fully represented in the ledger
 3. whether transfers were classified correctly
 4. whether your FHSA opening year is represented correctly
-5. whether withdrawals or institution-specific handling affect your own review
+5. whether all FHSA deductions claimed on your tax returns are reflected in metadata
+6. whether withdrawals or institution-specific handling affect your own review
 
 This extension is for convenience only. For actual FHSA tracking, planning, compliance, or filing-related work, use authoritative records and professional tools or professional advice.

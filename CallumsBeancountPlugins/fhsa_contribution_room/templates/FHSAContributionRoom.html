@@ -9,6 +9,9 @@
                 <th>Opening Room</th>
                 <th>Annual Contributions</th>
                 <th>Cumulative Contributions</th>
+                <th>Annual Deductions</th>
+                <th>Cumulative Deductions</th>
+                <th>Undeducted Contributions</th>
                 <th>Remaining Room</th>
                 <th>Remaining Lifetime Limit</th>
                 <th>Carry Forward</th>
@@ -16,7 +19,7 @@
         </thead>
         <tbody>
             {% for row in history | reverse %}
-            <tr>
+            <tr{% if (not row.deductions_valid) or (row.remaining_room < 0) %} style="background-color: #ffebee; color: #b71c1c;"{% endif %}>
                 <td>{{ row.year }}</td>
                 <td class="num">{{ row.annual_limit | format_currency('CAD') }}</td>
                 <td class="num">{{ row.opening_room | format_currency('CAD') }}</td>
@@ -24,7 +27,16 @@
                     {{ row.contributions | format_currency('CAD') if row.contributions > 0 else "-" }}
                 </td>
                 <td class="num"><strong>{{ row.cumulative_contributions | format_currency('CAD') }}</strong></td>
-                <td class="num">{{ row.remaining_room | format_currency('CAD') }}</td>
+                <td class="num" style="color: #1976d2;">
+                    {{ row.deductions | format_currency('CAD') if row.deductions > 0 else "-" }}
+                </td>
+                <td class="num">{{ row.cumulative_deductions | format_currency('CAD') }}</td>
+                <td class="num"{% if not row.deductions_valid %} style="color: #b71c1c; font-weight: 700;"{% endif %}>
+                    <strong>{{ row.undeducted_contributions | format_currency('CAD') }}</strong>
+                </td>
+                <td class="num"{% if row.remaining_room < 0 %} style="color: #b71c1c; font-weight: 700;"{% endif %}>
+                    <strong>{{ row.remaining_room | format_currency('CAD') }}</strong>
+                </td>
                 <td class="num">{{ row.remaining_lifetime_limit | format_currency('CAD') }}</td>
                 <td class="num">{{ row.carry_forward | format_currency('CAD') }}</td>
             </tr>

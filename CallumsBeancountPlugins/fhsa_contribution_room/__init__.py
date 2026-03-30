@@ -1,15 +1,17 @@
 """Fava extension for estimating FHSA contribution usage from ledger data.
 
 This extension inspects FHSA-tagged accounts and transaction history to build a
-year-by-year estimate of annual contributions, cumulative contributions, and
-remaining FHSA room. It is a convenience tracker only and must be checked
-against CRA records and professional tools before being relied upon for
-compliance or filing decisions.
+year-by-year estimate of annual contributions, cumulative contributions,
+cumulative deductions, remaining undeducted contributions, and remaining FHSA
+room. It is a convenience tracker only and must be checked against CRA records
+and professional tools before being relied upon for compliance or filing
+decisions.
 """
 
 from collections import defaultdict
 from datetime import date
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
+import re
 
 from beancount.core import data
 from fava.ext import FavaExtensionBase
@@ -20,7 +22,8 @@ class FHSAContributionRoom(FavaExtensionBase):
 
     The extension expects FHSA accounts to carry metadata such as
     ``canadian_tax_type: "FHSA"`` and uses optional ``owner`` and
-    ``start_year`` metadata to group and initialize calculations.
+    ``start_year`` metadata to group and initialize calculations. FHSA
+    deductions are supplied through keys like ``fhsa_deduction_2025``.
     """
 
     report_title = "FHSA Contribution Tracker"
@@ -35,6 +38,7 @@ class FHSAContributionRoom(FavaExtensionBase):
         "ZeroSumAccounts:Transfers",
         "Equity:Rounding-Errors:Imports",
     }
+    DEDUCTION_KEY_PATTERN = re.compile(r"^fhsa_deduction_(\d{4})$")
 
     def get_all_fhsa_data(self):
         """Estimate annual FHSA contributions and room for each owner.
@@ -46,11 +50,13 @@ class FHSAContributionRoom(FavaExtensionBase):
 
         Returns:
             A mapping of owner name to yearly history rows containing annual
-            room, annual contributions, cumulative contributions, and estimated
-            remaining room.
+            room, annual contributions, cumulative contributions, annual
+            deductions, cumulative deductions, remaining undeducted
+            contributions, and estimated remaining room.
         """
         owners = defaultdict(list)
         owner_start_years = {}
+        owner_deduction_data = defaultdict(dict)
         account_open_years = {
             entry.account: entry.date.year
             for entry in self.ledger.all_entries
@@ -73,6 +79,8 @@ class FHSAContributionRoom(FavaExtensionBase):
                 previous_year = owner_start_years.get(owner)
                 if previous_year is None or start_year < previous_year:
                     owner_start_years[owner] = start_year
+
+            self._merge_deduction_metadata(owner_deduction_data[owner], meta)
 
         results = {}
 
@@ -111,25 +119,35 @@ class FHSAContributionRoom(FavaExtensionBase):
 
             start_year = owner_start_years.get(owner)
             if start_year is None:
-                start_year = self._infer_start_year(yearly_contributions)
+                start_year = self._infer_start_year(
+                    yearly_contributions,
+                    owner_deduction_data[owner],
+                )
 
-            results[owner] = self._build_history(start_year, yearly_contributions)
+            results[owner] = self._build_history(
+                start_year,
+                yearly_contributions,
+                owner_deduction_data[owner],
+            )
 
         return results
 
-    def _build_history(self, start_year, yearly_contributions):
+    def _build_history(self, start_year, yearly_contributions, deduction_data):
         """Build yearly FHSA contribution rows for a single owner."""
         current_year = date.today().year
         last_activity_year = max(yearly_contributions.keys(), default=current_year)
-        final_year = max(current_year, last_activity_year)
+        last_deduction_year = max(deduction_data.keys(), default=current_year)
+        final_year = max(current_year, last_activity_year, last_deduction_year)
         eligibility_end_year = start_year + self.MAX_ELIGIBILITY_YEARS - 1
 
         history = []
         carry_forward = Decimal("0")
         cumulative_contributions = Decimal("0")
+        cumulative_deductions = Decimal("0")
 
         for year in range(start_year, final_year + 1):
             contributions = yearly_contributions[year]
+            deductions = deduction_data.get(year, Decimal("0"))
             remaining_lifetime_before = self.LIFETIME_LIMIT - cumulative_contributions
             is_eligible_year = year <= eligibility_end_year
 
@@ -144,7 +162,10 @@ class FHSAContributionRoom(FavaExtensionBase):
 
             closing_room = opening_room - contributions
             cumulative_contributions += contributions
+            cumulative_deductions += deductions
             remaining_lifetime_after = self.LIFETIME_LIMIT - cumulative_contributions
+            undeducted_contributions = cumulative_contributions - cumulative_deductions
+            deductions_valid = cumulative_deductions <= cumulative_contributions
 
             if remaining_lifetime_after < 0:
                 remaining_lifetime_after = Decimal("0")
@@ -165,6 +186,10 @@ class FHSAContributionRoom(FavaExtensionBase):
                     "opening_room": opening_room,
                     "contributions": contributions,
                     "cumulative_contributions": cumulative_contributions,
+                    "deductions": deductions,
+                    "cumulative_deductions": cumulative_deductions,
+                    "undeducted_contributions": undeducted_contributions,
+                    "deductions_valid": deductions_valid,
                     "remaining_room": closing_room,
                     "remaining_lifetime_limit": remaining_lifetime_after,
                     "carry_forward": carry_forward,
@@ -184,9 +209,34 @@ class FHSAContributionRoom(FavaExtensionBase):
         except (TypeError, ValueError):
             return None
 
-    def _infer_start_year(self, yearly_contributions):
+    def _infer_start_year(self, yearly_contributions, deduction_data):
         """Infer the FHSA opening year when metadata is absent."""
-        if yearly_contributions:
-            return max(self.FIRST_ELIGIBLE_YEAR, min(yearly_contributions))
+        candidate_years = set(yearly_contributions) | set(deduction_data)
+        if candidate_years:
+            return max(self.FIRST_ELIGIBLE_YEAR, min(candidate_years))
 
         return self.FIRST_ELIGIBLE_YEAR
+
+    def _merge_deduction_metadata(self, owner_deduction_data, meta):
+        """Merge FHSA deduction metadata for one owner across multiple accounts."""
+        for key, raw_value in meta.items():
+            match = self.DEDUCTION_KEY_PATTERN.match(str(key))
+            if match is None:
+                continue
+
+            amount = self._coerce_decimal(raw_value)
+            if amount is None:
+                continue
+
+            year = int(match.group(1))
+            owner_deduction_data[year] = amount
+
+    def _coerce_decimal(self, raw_value):
+        """Return a Decimal deduction amount from metadata when possible."""
+        if raw_value in (None, ""):
+            return None
+
+        try:
+            return Decimal(str(raw_value))
+        except (InvalidOperation, ValueError):
+            return None

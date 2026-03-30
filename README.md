@@ -119,10 +119,13 @@ to start the room calculation earlier than the default baseline.
   canadian_tax_type: "FHSA"
   owner: "Primary"
   start_year: "2024"
+  fhsa_deduction_2024: "6000"
 ```
 
 `owner` defaults to `Primary` if omitted. `start_year` is optional and is used
 to identify the first calendar year the FHSA was open for room calculations.
+FHSA deductions are expected to be entered manually using
+`fhsa_deduction_<year>` metadata keys.
 
 ### RRSP workflow assumptions
 
@@ -159,8 +162,9 @@ Examples of things you should still verify manually include:
 3. Return of capital and phantom distributions.
 4. TFSA contribution room as reported by CRA My Account.
 5. FHSA contribution usage and limits as reported by your institution or CRA.
-6. RRSP contribution room as reported by CRA My Account.
-7. Any cases involving corporate actions, unusual bookkeeping, or incomplete
+6. FHSA deductions claimed on your tax returns.
+7. RRSP contribution room as reported by CRA My Account.
+8. Any cases involving corporate actions, unusual bookkeeping, or incomplete
     historical ledger data.
 
 ## Plugin Documentation
