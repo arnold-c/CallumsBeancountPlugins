@@ -1,0 +1,48 @@
+<h2>RRSP Contributions</h2>
+{% for owner, history in extension.get_all_rrsp_data().items() %}
+    <h3>RRSP Contributions: {{ owner }}</h3>
+    <table class="sortable">
+        <thead>
+            <tr>
+                <th>Year</th>
+                <th>CRA Room</th>
+                <th>Status</th>
+                <th>Annual Contributions</th>
+                <th>Cumulative Contributions</th>
+                <th>Annual Deductions</th>
+                <th>Cumulative Deductions</th>
+                <th>Undeducted Contributions</th>
+                <th>Estimated Remaining Room</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in history | reverse %}
+            <tr{% if (not row.deductions_valid) or (row.remaining_room is not none and row.remaining_room < 0) %} style="background-color: #ffebee; color: #b71c1c;"{% endif %}>
+                <td>{{ row.year }}</td>
+                <td class="num">
+                    {{ row.cra_room | format_currency('CAD') if row.cra_room is not none else "-" }}
+                </td>
+                <td>{{ row.room_status }}</td>
+                <td class="num" style="color: #388e3c;">
+                    {{ row.contributions | format_currency('CAD') if row.contributions > 0 else "-" }}
+                </td>
+                <td class="num"><strong>{{ row.cumulative_contributions | format_currency('CAD') }}</strong></td>
+                <td class="num" style="color: #1976d2;">
+                    {{ row.deductions | format_currency('CAD') if row.deductions > 0 else "-" }}
+                </td>
+                <td class="num">{{ row.cumulative_deductions | format_currency('CAD') }}</td>
+                <td class="num"{% if not row.deductions_valid %} style="color: #b71c1c; font-weight: 700;"{% endif %}>
+                    <strong>{{ row.undeducted_contributions | format_currency('CAD') }}</strong>
+                </td>
+                <td class="num"{% if row.remaining_room is not none and row.remaining_room < 0 %} style="color: #b71c1c; font-weight: 700;"{% endif %}>
+                    {% if row.remaining_room is not none %}
+                        <strong>{{ row.remaining_room | format_currency('CAD') }}</strong>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endfor %}
