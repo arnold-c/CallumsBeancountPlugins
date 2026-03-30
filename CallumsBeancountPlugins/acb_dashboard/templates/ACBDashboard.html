@@ -1,0 +1,41 @@
+{% extends "_layout.html" %}
+{% set active_page = extension.report_title %}
+
+{% block content %}
+<div class="header">
+    <h3>{{ extension.report_title }} - Historical Year-End Snapshots</h3>
+</div>
+
+{% set history = extension.get_acb_history() %}
+
+{% for year in history.keys() | sort(reverse=True) %}
+<div class="year-section">
+    <h4>Year-End {{ year }}</h4>
+    <table class="sortable">
+        <thead>
+            <tr>
+                <th>Account</th>
+                <th>Ticker</th>
+                <th class="num">Shares</th>
+                <th class="num">Total ACB (CAD)</th>
+                <th class="num">Avg Cost/Share</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for acct, tickers in history[year].items() %}
+                {% for tckr, data in tickers.items() %}
+                <tr>
+                    <td>{{ acct }}</td>
+                    <td>{{ tckr }}</td>
+                    <td class="num">{{ data.shares | round(4) }}</td>
+                    <td class="num">{{ data.total_acb | round(2) }}</td>
+                    <td class="num">{{ data.avg_cost | round(2) }}</td>
+                </tr>
+                {% endfor %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<br>
+{% endfor %}
+{% endblock %}

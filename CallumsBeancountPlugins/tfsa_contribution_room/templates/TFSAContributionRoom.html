@@ -1,0 +1,36 @@
+<h2>TFSA Contribution Room</h3>
+{% for owner, history in extension.get_all_tfsa_data().items() %}
+    <h3>TFSA Room: {{ owner }}</h2>
+    <table class="sortable">
+        <thead>
+            <tr>
+                <th>Year</th>
+                <th>Annual Limit</th>
+                <th>Annual Contributions</th>
+                <th>Annual Withdrawals</th>
+                <th>Remaining Room</th>
+            </tr>
+        </thead>
+        <tbody>
+            {# Adding the | reverse filter here flips the order for display #}
+            {% for row in history | reverse %}
+            <tr>
+                <td>{{ row.year }}</td>
+                <td class="num">{{ row.limit | format_currency('CAD') }}</td>
+
+                <td class="num" style="color: #388e3c;">
+                    {{ row.contributions | format_currency('CAD') if row.contributions > 0 else "-" }}
+                </td>
+
+                <td class="num" style="color: #d32f2f;">
+                    {{ row.withdrawals | format_currency('CAD') if row.withdrawals > 0 else "-" }}
+                </td>
+
+                <td class="num">
+                    <strong>{{ row.available | format_currency('CAD') }}</strong>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endfor %}

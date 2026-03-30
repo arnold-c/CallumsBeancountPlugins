@@ -1,0 +1,19 @@
+[project]
+authors = [{name = "Callum Arnold", email = "24391445+arnold-c@users.noreply.github.com"}]
+dependencies = []
+name = "CallumsBeancountPlugins"
+requires-python = ">= 3.11"
+version = "0.1.0"
+
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling"]
+
+[tool.pixi.workspace]
+channels = ["https://conda.modular.com/max-nightly", "conda-forge"]
+platforms = ["osx-arm64"]
+
+[tool.pixi.pypi-dependencies]
+callumsbeancountplugins = { path = ".", editable = true }
+
+[tool.pixi.tasks]
