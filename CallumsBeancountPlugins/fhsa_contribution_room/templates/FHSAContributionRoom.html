@@ -1,0 +1,34 @@
+<h2>FHSA Contributions</h2>
+{% for owner, history in extension.get_all_fhsa_data().items() %}
+    <h3>FHSA Contributions: {{ owner }}</h3>
+    <table class="sortable">
+        <thead>
+            <tr>
+                <th>Year</th>
+                <th>Annual Limit</th>
+                <th>Opening Room</th>
+                <th>Annual Contributions</th>
+                <th>Cumulative Contributions</th>
+                <th>Remaining Room</th>
+                <th>Remaining Lifetime Limit</th>
+                <th>Carry Forward</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in history | reverse %}
+            <tr>
+                <td>{{ row.year }}</td>
+                <td class="num">{{ row.annual_limit | format_currency('CAD') }}</td>
+                <td class="num">{{ row.opening_room | format_currency('CAD') }}</td>
+                <td class="num" style="color: #388e3c;">
+                    {{ row.contributions | format_currency('CAD') if row.contributions > 0 else "-" }}
+                </td>
+                <td class="num"><strong>{{ row.cumulative_contributions | format_currency('CAD') }}</strong></td>
+                <td class="num">{{ row.remaining_room | format_currency('CAD') }}</td>
+                <td class="num">{{ row.remaining_lifetime_limit | format_currency('CAD') }}</td>
+                <td class="num">{{ row.carry_forward | format_currency('CAD') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endfor %}

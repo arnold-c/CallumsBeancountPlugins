@@ -10,7 +10,7 @@ Always check the output against CRA records, broker statements, fund notices, an
 
 ## Included Plugins
 
-This repository currently contains four plugins.
+This repository currently contains five plugins.
 
 1. `calculate_acb`
    A Beancount plugin that derives convenience ACB, tax-basis, and realised gain postings from qualifying investment transactions and supported custom directives.
@@ -19,7 +19,10 @@ This repository currently contains four plugins.
 3. `realised_gains`
    A Fava extension that summarizes gain-related postings by year and person.
 4. `tfsa_contribution_room`
-   A Fava extension that estimates TFSA contribution room from ledger activity and account metadata.
+    A Fava extension that estimates TFSA contribution room from ledger activity and account metadata.
+5. `fhsa_contribution_room`
+   A Fava extension that estimates FHSA contribution usage, cumulative
+   contributions, and remaining room from ledger activity and account metadata.
 
 ## Related ACB Plugins
 
@@ -68,6 +71,7 @@ Enable the Fava extensions in your Fava configuration using their import paths:
 1. `CallumsBeancountPlugins.acb_dashboard`
 2. `CallumsBeancountPlugins.realised_gains`
 3. `CallumsBeancountPlugins.tfsa_contribution_room`
+4. `CallumsBeancountPlugins.fhsa_contribution_room`
 
 The exact Fava configuration format depends on how you launch Fava, but each extension is intended to be added by its Python module path.
 
@@ -101,6 +105,20 @@ If your ledger uses different conventions, you should review the plugin code bef
 `owner` defaults to `Primary` if omitted. `start_year` is optional and is used
 to start the room calculation earlier than the default baseline.
 
+### FHSA workflow assumptions
+
+`fhsa_contribution_room` expects FHSA accounts to include metadata such as:
+
+```beancount
+2024-01-01 open Assets:CA:Primary:FHSA:Cash CAD,CASH "NONE"
+  canadian_tax_type: "FHSA"
+  owner: "Primary"
+  start_year: "2024"
+```
+
+`owner` defaults to `Primary` if omitted. `start_year` is optional and is used
+to identify the first calendar year the FHSA was open for room calculations.
+
 ## Limitations
 
 These plugins are convenience tools, not a substitute for tax software.
@@ -112,7 +130,8 @@ Examples of things you should still verify manually include:
 2. Capital gains and losses reported on slips and statements.
 3. Return of capital and phantom distributions.
 4. TFSA contribution room as reported by CRA My Account.
-5. Any cases involving corporate actions, unusual bookkeeping, or incomplete
+5. FHSA contribution usage and limits as reported by your institution or CRA.
+6. Any cases involving corporate actions, unusual bookkeeping, or incomplete
    historical ledger data.
 
 ## Plugin Documentation
@@ -123,3 +142,4 @@ Each plugin directory contains its own `README.md` with details on what it does,
 2. `CallumsBeancountPlugins/acb_dashboard/README.md`
 3. `CallumsBeancountPlugins/realised_gains/README.md`
 4. `CallumsBeancountPlugins/tfsa_contribution_room/README.md`
+5. `CallumsBeancountPlugins/fhsa_contribution_room/README.md`
