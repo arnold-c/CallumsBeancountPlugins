@@ -2,7 +2,7 @@
 
 Convenience Beancount and Fava plugins for a Canadian personal-finance workflow.
 
-These plugins are designed to make a Beancount ledger easier to work with for common Canadian bookkeeping tasks such as adjusted cost base tracking, realised gains reporting, and TFSA contribution room estimation.
+These plugins are designed to make a Beancount ledger easier to work with for common Canadian bookkeeping tasks such as adjusted cost base tracking, realized gains reporting, and TFSA contribution room estimation.
 
 They are not authoritative tax software.
 
@@ -13,10 +13,10 @@ Always check the output against CRA records, broker statements, fund notices, an
 This repository currently contains six plugins.
 
 1. `calculate_acb`
-   A Beancount plugin that derives convenience ACB, tax-basis, and realised gain postings from qualifying investment transactions and supported custom directives.
+   A Beancount plugin that derives convenience ACB, tax-basis, and realized gain postings from qualifying investment transactions and supported custom directives.
 2. `acb_dashboard`
    A Fava extension that reconstructs historical year-end ACB snapshots for currently held positions.
-3. `realised_gains`
+3. `realized_gains`
    A Fava extension that summarizes gain-related postings by year and person.
 4. `tfsa_contribution_room`
      A Fava extension that estimates TFSA contribution room from ledger activity and account metadata.
@@ -34,7 +34,7 @@ The three ACB-related plugins are intended to be used together.
 
 1. `calculate_acb` does the bookkeeping work.
 2. `acb_dashboard` provides a year-end ACB view over the resulting ledger.
-3. `realised_gains` provides a gains-focused summary over the resulting ledger.
+3. `realized_gains` provides a gains-focused summary over the resulting ledger.
 
 You can use the Fava extensions independently, but they are most useful when the ledger follows the same conventions as `calculate_acb` and, in practice, when that Beancount plugin is enabled.
 
@@ -73,7 +73,7 @@ plugin "CallumsBeancountPlugins.calculate_acb" "Assets:Investments:Non-Registere
 Enable the Fava extensions in your Fava configuration using their import paths:
 
 1. `CallumsBeancountPlugins.acb_dashboard`
-2. `CallumsBeancountPlugins.realised_gains`
+2. `CallumsBeancountPlugins.realized_gains`
 3. `CallumsBeancountPlugins.tfsa_contribution_room`
 4. `CallumsBeancountPlugins.fhsa_contribution_room`
 5. `CallumsBeancountPlugins.rrsp_contribution_room`
@@ -91,7 +91,7 @@ The plugins in this repository assume a specific ledger style.
 1. Investment holdings are recorded under `Assets:...` accounts.
 2. Tax-basis adjustments are posted to derived `Assets:TaxBasis:...` accounts.
 3. Income-side postings are derived by replacing `Assets` with `Income`.
-4. Realised gain balancing entries use `Equity:<person>:RealisedGains`.
+4. realized gain balancing entries use `Equity:<person>:realizedGains`.
 5. The account path usually encodes the owner in the third path component.
 
 If your ledger uses different conventions, you should review the plugin code before relying on it.
@@ -169,7 +169,7 @@ Each plugin directory contains its own `README.md` with details on what it does,
 
 1. `CallumsBeancountPlugins/calculate_acb/README.md`
 2. `CallumsBeancountPlugins/acb_dashboard/README.md`
-3. `CallumsBeancountPlugins/realised_gains/README.md`
+3. `CallumsBeancountPlugins/realized_gains/README.md`
 4. `CallumsBeancountPlugins/tfsa_contribution_room/README.md`
 5. `CallumsBeancountPlugins/fhsa_contribution_room/README.md`
 6. `CallumsBeancountPlugins/rrsp_contribution_room/README.md`

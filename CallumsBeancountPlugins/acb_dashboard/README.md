@@ -40,7 +40,7 @@ This is one of the three related ACB plugins in the repository.
 
 1. `calculate_acb` produces convenience tax-basis and gains bookkeeping.
 2. `acb_dashboard` shows a year-end holdings and ACB view.
-3. `realised_gains` shows a gains-oriented summary.
+3. `realized_gains` shows a gains-oriented summary.
 
 This dashboard is most useful when `calculate_acb` is enabled, because it uses the same account conventions and can incorporate generated `Assets:TaxBasis` postings.
 

@@ -17,7 +17,7 @@ For qualifying transactions and supported `Custom` directives, it can:
 1. track shares held
 2. track total CAD adjusted cost base
 3. reduce ACB on sale using average cost
-4. add realised-gain postings on sale
+4. add realized-gain postings on sale
 5. post tax-basis adjustments for phantom distributions and ROC
 6. reclassify certain dividend amounts as capital-gain dividends
 
@@ -79,7 +79,7 @@ Examples of derived paths include:
 On sales, the plugin also posts to:
 
 ```beancount
-Equity:<person>:RealisedGains
+Equity:<person>:realizedGains
 ```
 
 where `<person>` is inferred from the third account component when available.
@@ -215,7 +215,7 @@ This plugin is the bookkeeping foundation for the other ACB-related plugins in t
 
 1. `../acb_dashboard/README.md` explains the Fava dashboard for year-end ACB
    snapshots.
-2. `../realised_gains/README.md` explains the Fava dashboard for gains
+2. `../realized_gains/README.md` explains the Fava dashboard for gains
    summaries.
 
 Those two Fava extensions are most useful when this plugin, or an equivalent accounting workflow, is already in place.
@@ -228,6 +228,6 @@ You should review and validate at least the following.
 2. whether your broker or fund issuer reports different adjustment values
 3. whether all historical purchases needed for correct average cost are present
 4. whether sales, splits, transfers, or reorganizations need special handling
-5. whether the derived realised gains match the records you actually rely on
+5. whether the derived realized gains match the records you actually rely on
 
 For real tax tracking and compliance, use professional tools and professional advice. Treat this plugin as a convenience aid only.

@@ -19,12 +19,12 @@ ACBError = namedtuple("ACBError", "source message entry")
 
 
 def calculate_acb(entries, options_map, config=""):
-    """Derive convenience ACB postings and realised gains from a ledger.
+    """Derive convenience ACB postings and realized gains from a ledger.
 
     This Beancount plugin walks through ledger entries in order, tracking
     per-account and per-ticker share balances and CAD adjusted cost base. It
     handles supported ``Custom`` directives of type ``acb_adjust`` and augments
-    qualifying buy and sell transactions with generated tax-basis and realised
+    qualifying buy and sell transactions with generated tax-basis and realized
     gain postings.
 
     Configure it in a ledger with a standard plugin declaration such as
@@ -317,7 +317,7 @@ def calculate_acb(entries, options_map, config=""):
                             )
                             added_postings.append(
                                 data.Posting(
-                                    f"Equity:{person}:RealisedGains",
+                                    f"Equity:{person}:RealizedGains",
                                     gain_amount,
                                     None,
                                     None,
