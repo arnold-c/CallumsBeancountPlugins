@@ -1,3 +1,11 @@
+"""Fava extension for estimating TFSA contribution room from ledger data.
+
+This extension inspects TFSA-tagged accounts and transaction history to build a
+year-by-year contribution room estimate. It is a convenience tracker only and
+must be checked against CRA records and professional tools before being relied
+upon for compliance or filing decisions.
+"""
+
 from fava.ext import FavaExtensionBase
 from beancount.core import data
 from datetime import date
@@ -6,30 +14,41 @@ import decimal
 
 
 class TFSAContributionRoom(FavaExtensionBase):
+    """Render TFSA contribution room estimates inside Fava.
+
+    The extension expects TFSA accounts to carry metadata such as
+    ``canadian_tax_type: "TFSA"`` and uses optional ``owner`` and
+    ``start_year`` metadata to group and initialize calculations.
+    """
+
     report_title = "TFSA Room Tracker"
 
     TFSA_LIMITS = {
-        2009: 5000,
-        2010: 5000,
-        2011: 5000,
-        2012: 5000,
-        2013: 5500,
-        2014: 5500,
+        **{year: 5000 for year in range(2009, 2013)},
+        **{year: 5500 for year in range(2013, 2015)},
         2015: 10000,
-        2016: 5500,
-        2017: 5500,
-        2018: 5500,
-        2019: 6000,
-        2020: 6000,
-        2021: 6000,
-        2022: 6000,
+        **{year: 5500 for year in range(2016, 2019)},
+        **{year: 6000 for year in range(2019, 2023)},
         2023: 6500,
-        2024: 7000,
-        2025: 7000,
-        2026: 7000,
+        **{year: 7000 for year in range(2024, 2027)},
     }
 
     def get_all_tfsa_data(self):
+        """Estimate annual TFSA contribution room for each owner.
+
+        The calculation groups TFSA accounts by owner, totals qualifying CAD
+        contributions and withdrawals by year, and then applies annual TFSA
+        limits plus carried-forward withdrawal room.
+
+        Returns:
+            A mapping of owner name to yearly history rows containing annual
+            limit, contributions, withdrawals, and estimated remaining room.
+
+        Notes:
+            This is an estimate derived from ledger data and metadata. CRA's
+            official records can differ, so the results should be verified
+            independently.
+        """
         owners = defaultdict(list)
         owner_start_years = {}
         INTERNAL_ACCOUNTS = {
