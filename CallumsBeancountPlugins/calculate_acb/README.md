@@ -113,13 +113,13 @@ Specifying transactions using `@` or `@@` should work, but I use `@@` cost direc
 #### Standard buy and sell workflow
 
 ```beancount
-2024-01-10 * "Buy VEQT"
-  Assets:CA:Primary:Taxable:Broker      10 VEQT @ 35.00 CAD
-  Assets:CA:Primary:Cash              -350.00 CAD
+2024-01-10 * "Buy XEQT"
+  Assets:CA:Primary:Taxable:Broker      10 XEQT @ 35.00 CAD
+  Assets:CA:Primary:Taxable:Broker              -350.00 CAD
 
-2024-06-15 * "Sell VEQT"
-  Assets:CA:Primary:Taxable:Broker      -4 VEQT @@ 156.00 CAD
-  Assets:CA:Primary:Cash
+2024-06-15 * "Sell XEQT"
+  Assets:CA:Primary:Taxable:Broker      -4 XEQT @@ 156.00 CAD
+  Assets:CA:Primary:Taxable:Broker
 ```
 
 ### From CDS.ca
@@ -133,7 +133,7 @@ See [adjustedcostbasis.ca's blog](https://www.adjustedcostbase.ca/blog/phantom-d
 ```beancount
 2024-12-31 custom "acb_adjust"
   "Assets:CA:Primary:Taxable:Broker"
-  "VEQT"
+  "XEQT"
   "roc"
   0.08 CAD
   "per-share"
@@ -149,7 +149,7 @@ Alternatively, you can perform these calculations by hand and just enter the tot
 ```beancount
 2024-12-31 custom "acb_adjust"
   "Assets:CA:Primary:Taxable:Broker"
-  "VEQT"
+  "XEQT"
   "phantom"
   0.12 CAD
   "per-share"
@@ -168,7 +168,7 @@ Alternatively, you can perform these calculations by hand and just enter the tot
 ```beancount
 2024-12-31 custom "acb_adjust"
   "Assets:CA:Primary:Taxable:Broker"
-  "VEQT"
+  "XEQT"
   "cg_dividend"
   10.50 CAD
   "total"
@@ -186,7 +186,7 @@ Alternatively, you can perform these calculations by hand and just enter the tot
 ```beancount
 2024-12-31 custom "acb_adjust"
   "Assets:CA:Primary:Taxable:Broker"
-  "VEQT"
+  "XEQT"
   "cg_split"
   0.30 CAD # This is the capital gain amount
   0.12 CAD # This is the non cash (phantom) distribution
