@@ -10,7 +10,7 @@ Always check the output against CRA records, broker statements, fund notices, an
 
 ## Included Plugins
 
-This repository currently contains six plugins.
+This repository currently contains seven plugins.
 
 1. `calculate_acb`
    A Beancount plugin that derives convenience ACB, tax-basis, and realized gain postings from qualifying investment transactions and supported custom directives.
@@ -21,12 +21,15 @@ This repository currently contains six plugins.
 4. `tfsa_contribution_room`
      A Fava extension that estimates TFSA contribution room from ledger activity and account metadata.
 5. `fhsa_contribution_room`
-    A Fava extension that estimates FHSA contribution usage, cumulative
-    contributions, and remaining room from ledger activity and account metadata.
+     A Fava extension that estimates FHSA contribution usage, cumulative
+     contributions, and remaining room from ledger activity and account metadata.
 6. `rrsp_contribution_room`
-    A Fava extension that estimates RRSP contribution usage, cumulative
-    contributions, and remaining room from ledger activity and manually
-    recorded CRA room metadata.
+     A Fava extension that estimates RRSP contribution usage, cumulative
+     contributions, and remaining room from ledger activity and manually
+     recorded CRA room metadata.
+7. `expense_summaries`
+    A Fava extension that summarizes yearly expenses by category and computes
+    monthly averages using completed active months only.
 
 ## Related ACB Plugins
 
@@ -77,6 +80,7 @@ Enable the Fava extensions in your Fava configuration using their import paths:
 3. `CallumsBeancountPlugins.tfsa_contribution_room`
 4. `CallumsBeancountPlugins.fhsa_contribution_room`
 5. `CallumsBeancountPlugins.rrsp_contribution_room`
+6. `CallumsBeancountPlugins.expense_summaries`
 
 The exact Fava configuration format depends on how you launch Fava, but each extension is intended to be added by its Python module path.
 
@@ -164,7 +168,8 @@ Examples of things you should still verify manually include:
 5. FHSA contribution usage and limits as reported by your institution or CRA.
 6. FHSA deductions claimed on your tax returns.
 7. RRSP contribution room as reported by CRA My Account.
-8. Any cases involving corporate actions, unusual bookkeeping, or incomplete
+8. Expense category totals and monthly averages used for budgeting or review.
+9. Any cases involving corporate actions, unusual bookkeeping, or incomplete
     historical ledger data.
 
 ## Plugin Documentation
@@ -177,3 +182,4 @@ Each plugin directory contains its own `README.md` with details on what it does,
 4. `CallumsBeancountPlugins/tfsa_contribution_room/README.md`
 5. `CallumsBeancountPlugins/fhsa_contribution_room/README.md`
 6. `CallumsBeancountPlugins/rrsp_contribution_room/README.md`
+7. `CallumsBeancountPlugins/expense_summaries/README.md`

@@ -1,0 +1,86 @@
+{% extends "_layout.html" %}
+{% set active_page = extension.report_title %}
+
+{% block content %}
+<div class="header">
+    <h3>{{ extension.report_title }}</h3>
+</div>
+
+{% set summary_data = extension.get_expense_summary_data() %}
+{% set years = summary_data.years %}
+{% set categories = summary_data.categories %}
+{% set months_by_year = summary_data.months_by_year %}
+{% set average_months_by_year = summary_data.average_months_by_year %}
+{% set total_by_year = summary_data.total_by_year %}
+{% set average_total_by_year = summary_data.average_total_by_year %}
+{% set total_rows = summary_data.total_rows %}
+{% set average_rows = summary_data.average_rows %}
+
+<h4>Yearly Expense Totals (CAD)</h4>
+<table class="sortable">
+    <thead>
+        <tr>
+            <th>Category</th>
+            {% for year in years %}
+            <th data-sort="num">{{ year }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in total_rows %}
+        <tr>
+            <td>{{ row.category }}</td>
+            {% for year in years %}
+            <td class="num">{{ "-" if row[year] == 0 else row[year] }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+        <tr>
+            <td><strong>Active Months</strong></td>
+            {% for year in years %}
+            <td class="num"><strong>{{ months_by_year[year] }}</strong></td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <td><strong>Total (CAD)</strong></td>
+            {% for year in years %}
+            <td class="num"><strong>{{ total_by_year[year] }}</strong></td>
+            {% endfor %}
+        </tr>
+    </tbody>
+</table>
+
+<h4>Average Expense Per Active Month (CAD)</h4>
+<table class="sortable">
+    <thead>
+        <tr>
+            <th>Category</th>
+            {% for year in years %}
+            <th data-sort="num">{{ year }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in average_rows %}
+        <tr>
+            <td>{{ row.category }}</td>
+            {% for year in years %}
+            <td class="num">{{ "-" if row[year] == 0 else row[year] }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+        <tr>
+            <td><strong>Completed Active Months</strong></td>
+            {% for year in years %}
+            <td class="num"><strong>{{ average_months_by_year[year] }}</strong></td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <td><strong>Average Total (CAD)</strong></td>
+            {% for year in years %}
+            <td class="num"><strong>{{ average_total_by_year[year] }}</strong></td>
+            {% endfor %}
+        </tr>
+    </tbody>
+</table>
+{% endblock %}
